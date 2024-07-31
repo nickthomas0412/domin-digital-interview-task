@@ -10,12 +10,28 @@ Interview task for the Software Engineer role at Domin
 1. Clone the repository
 ```
 git clone https://github.com/nickthomas0412/domin-digital-interview-task.git
+cd domin-digital-interview-task
 ```
 
-2. Install Python requirements
+2. Install Python requirements (activate or create a python environment)
+If a new venv is required for the directory then:
+
+On Windows
 ```
 cd backend
-pip install -r requirement.txt
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+On macOS/Linux
+```
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+```
+pip install -r requirements.txt
 cd ..
 ```
 
@@ -26,18 +42,16 @@ npm install
 cd ..
 ```
 
-
 4. Run the sensor application
 ```
 cd backend
 python main.py
 ```
 
-5. Run the backend ap
+5. Run the backend app
 ```
 cd backend
 flask run
-cd ..
 ``` 
 
 6. Run the frontend:
