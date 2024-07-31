@@ -1,4 +1,5 @@
 """This file was forked from the Domin GitHub interview task repo with minor modifications."""
+
 import csv
 import socket
 import time
@@ -27,14 +28,15 @@ logger.log(logging.INFO, "sending data")
 for index, row in enumerate(data):
     while float(row[10]) > time.time() - start_time:  # check row ts is not in the future
         logger.log(logging.INFO, {"waiting for": row[10]})
+        time.sleep(0.0001)
         pass
     message = ",".join(row).encode()
-    sock.sendto(message, ("localhost", 12345)) # Vehicle data
+    sock.sendto(message, ("localhost", 12345))  # Vehicle data
     if index % 10 == 0:
-        sock.sendto(message, ("localhost", 12346)) # Suspension front left
-        sock.sendto(message, ("localhost", 12347)) # Suspension front right
+        sock.sendto(message, ("localhost", 12346))  # Suspension front left
+        sock.sendto(message, ("localhost", 12347))  # Suspension front right
 
-    logger.log(logging.INFO, {"sent:": message})
+    # logger.log(logging.INFO, {"sent:": message})
 
 sock.close()
 logger.log(logging.INFO, "done")

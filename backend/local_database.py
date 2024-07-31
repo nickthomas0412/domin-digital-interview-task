@@ -4,14 +4,18 @@ from datetime import datetime, timedelta
 import threading
 import time
 from queue import Queue
+import json
 
 from sqlalchemy import text
 
 from models import engine
 
+DB_LOCK = threading.Lock()
+
 
 class DatabaseWriter(threading.Thread):
     """DatabaseWriter class responsible for writing sensor data to the local database."""
+
     def __init__(self, data_q: Queue):
         """Initialise the DatabaseWriter class.
 
@@ -19,11 +23,11 @@ class DatabaseWriter(threading.Thread):
             data_q (Queue): Input data queue.
         """
         super().__init__()
-        self.queue = data_q
+        self._queue = data_q
         self.lock = threading.Lock()
-        self.write_interval = timedelta(seconds=2)
-        self.retention_period = timedelta(seconds=1000)
-        self.clear_check_interval = timedelta(seconds=5)
+        self._write_interval = timedelta(seconds=0.5)
+        self._retention_period = timedelta(seconds=100)
+        self._clear_check_interval = timedelta(seconds=5)
 
     def run(self):
         """Main function called when the thread is started that handles writing and clear data from the database."""
@@ -34,25 +38,25 @@ class DatabaseWriter(threading.Thread):
         while True:
             current_time = datetime.now()
             # Write data to database every write interval
-            if current_time - last_write_time >= self.write_interval:
+            if current_time - last_write_time >= self._write_interval:
                 self._write_data_to_db()
                 last_write_time = current_time
             # Clear any data now out of data every clear check interval
-            if current_time - last_clear_time >= self.clear_check_interval:
+            if current_time - last_clear_time >= self._clear_check_interval:
                 last_clear_time = current_time
                 self._clear_old_data()
             time.sleep(0.1)
 
     def _write_data_to_db(self):
         """Write data from the input queue to the database."""
-        if self.queue.empty():
+        if self._queue.empty():
             return
 
-        with self.lock:
+        with DB_LOCK:
             t_start = datetime.now()
             buffer = []
-            while not self.queue.empty() and (datetime.now() - t_start) <= self.write_interval:
-                buffer.append(self.queue.get())
+            while not self._queue.empty() and (datetime.now() - t_start) <= self._write_interval:
+                buffer.append(self._queue.get())
 
             with engine.connect() as conn:
                 conn.execute(
@@ -65,8 +69,8 @@ class DatabaseWriter(threading.Thread):
 
     def _clear_old_data(self):
         """Clear data from the database that is older than the retention period."""
-        with self.lock:
-            cutoff_time = datetime.now() - self.retention_period
+        with DB_LOCK:
+            cutoff_time = datetime.now() - self._retention_period
             with engine.connect() as conn:
                 conn.execute(
                     text("DELETE FROM sensor_data WHERE timestamp < :cutoff_time"),
@@ -90,11 +94,12 @@ def fetch_latest_data():
                 GROUP BY sensor_name
             )
             """
-    with engine.connect() as conn:
-        result = conn.execute(text(query)).fetchall()
-        latest_data = {}
-        for row in result:
-            result_dict = row._asdict()
-            latest_data[result_dict["sensor_name"]] = result_dict["attributes"]
+    with DB_LOCK:
+        with engine.connect() as conn:
+            result = conn.execute(text(query)).fetchall()
+            latest_data = {}
+            for row in result:
+                result_dict = row._asdict()
+                latest_data[result_dict["sensor_name"]] = json.loads(result_dict["attributes"])
 
     return latest_data

@@ -12,10 +12,11 @@ const App = () => {
         const fetchLatestData = () => {
             axios.get('http://localhost:5000/latest_data')
                 .then(response => {
-                    if (response.data && Object.keys(response.data).length > 0) {
-                        setLatestSensorData(response.data);
-                        setLastUpdated(new Date().toLocaleTimeString());
-                    }
+                    setLatestSensorData(response.data);
+                    const now = new Date();
+                    const formattedTime = now.toLocaleTimeString() + '.' + String(now.getMilliseconds()).padStart(3, '0');
+                    setLastUpdated(formattedTime);
+                    
                 })
                 .catch(error => {
                     console.error('Error fetching the data: ', error);
@@ -24,7 +25,8 @@ const App = () => {
 
         fetchLatestData()
 
-        const fetchInterval = setInterval(fetchLatestData, 100);
+        // Query the database every 0.25 second to update the UI with the latest value. Could change frequency. 
+        const fetchInterval = setInterval(fetchLatestData, 250);
 
         return () => clearInterval(fetchInterval);
     }, []);

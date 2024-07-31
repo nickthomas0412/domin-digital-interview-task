@@ -31,12 +31,8 @@ def main():
     front_right_sensor_thread.daemon = True
     front_right_sensor_thread.start()
 
-    
-    from local_database import fetch_latest_data
-    data = fetch_latest_data()
-
     while True:
-        time.sleep(0.1)
+        time.sleep(1)
 
 
 if __name__ == "__main__":

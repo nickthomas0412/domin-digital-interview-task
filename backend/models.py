@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = "sqlite:///sensor_data.db"
 TABLE_NAME = "sensor_data"
-DEBUG_ECHO = True
+DEBUG_ECHO = False
 
 Base = declarative_base()
 
@@ -19,6 +19,7 @@ class SensorData(Base):
     Args:
         Base: Base sqlalchemy table type.
     """
+
     __tablename__ = TABLE_NAME
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime, default=datetime.now())

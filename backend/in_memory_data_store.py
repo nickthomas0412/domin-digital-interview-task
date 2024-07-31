@@ -17,6 +17,6 @@ class InMemoryDataStore:
                 self.data[sensor_name] = {}
             self.data[sensor_name] = attributes
 
-    def get_latest_data(self) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    def get_latest_data(self) -> Dict[str, Dict[str, Any]]:
         with self.lock:
             return self.data.copy()
