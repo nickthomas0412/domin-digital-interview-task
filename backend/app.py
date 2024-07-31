@@ -6,7 +6,7 @@ from datetime import datetime
 
 from local_database import fetch_latest_data
 
-# Initialize the Flask application and the datastore
+# Initialize the Flask application
 app = Flask(__name__)
 CORS(app)
 

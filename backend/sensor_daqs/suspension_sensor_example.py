@@ -74,6 +74,5 @@ class SuspensionSensor(threading.Thread):
 
             except ValueError as e:
                 print(f"ValueError while processing data: {e}")
-
             except Exception as e:
                 print(f"General exception triggered while recording sensor data: {e}")
